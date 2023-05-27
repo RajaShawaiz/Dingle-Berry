@@ -448,8 +448,8 @@ contract DINGLE is Context, IERC20, Ownable {
 
     function clearStuckBalance(uint256 amountPercentage) external onlyOwner {
         require(amountPercentage < 101, "Max 100%");
-        uint256 amountBNB = address(this).balance;
-        uint256 amountToClear = ( amountBNB * amountPercentage ) / 100;
+        uint256 amountETH = address(this).balance;
+        uint256 amountToClear = ( amountETH * amountPercentage ) / 100;
         payable(msg.sender).transfer(amountToClear);
         emit BalanceClear(amountToClear);
     }
@@ -465,12 +465,11 @@ contract DINGLE is Context, IERC20, Ownable {
 
         return IERC20(tokenAddress).transfer(msg.sender, tokens);
     }
-
+    
     function swapBack() internal swapping {
+        uint256 totalETHFee = liquidityFee;
 
-        uint256 totalBNBFee = totalFee;
-
-        uint256 amountToLiquify = (swapThreshold * liquidityFee)/(totalBNBFee * 2);
+        uint256 amountToLiquify = (swapThreshold * liquidityFee) / (totalETHFee * 2);
         uint256 amountToSwap = swapThreshold - amountToLiquify;
 
         address[] memory path = new address[](2);
@@ -485,14 +484,12 @@ contract DINGLE is Context, IERC20, Ownable {
             block.timestamp
         );
 
-        uint256 amountBNB = address(this).balance;
+        uint256 amountETH = address(this).balance;
 
-         totalBNBFee = totalBNBFee - (liquidityFee / 2);
-        
-        uint256 amountBNBLiquidity = (amountBNB * liquidityFee) / (totalBNBFee * 2);
+        uint256 amountETHLiquidity = (amountETH * liquidityFee) / (totalETHFee * 2);
 
-        if(amountToLiquify > 0){
-            router.addLiquidityETH{value: amountBNBLiquidity}(
+        if (amountToLiquify > 0) {
+            router.addLiquidityETH{value: amountETHLiquidity}(
                 address(this),
                 amountToLiquify,
                 0,
@@ -500,7 +497,7 @@ contract DINGLE is Context, IERC20, Ownable {
                 address(this),
                 block.timestamp
             );
-            emit AutoLiquify(amountBNBLiquidity, amountToLiquify);
+            emit AutoLiquify(amountETHLiquidity, amountToLiquify);
         }
     }
 
@@ -575,7 +572,7 @@ contract DINGLE is Context, IERC20, Ownable {
     }
     
 
-event AutoLiquify(uint256 amountBNB, uint256 amountTokens);
+event AutoLiquify(uint256 amountETH, uint256 amountTokens);
 event UpdateFee(uint8 Buy, uint8 Sell, uint8 Transfer);
 mapping(address => bool) public _isBlacklisted;
 event Wallet_feeExempt(address Wallet, bool Status);
