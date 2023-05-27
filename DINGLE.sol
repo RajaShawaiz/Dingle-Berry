@@ -337,9 +337,6 @@ contract DINGLE is IERC20, Ownable {
     uint256 sellMultiplier = 100;
     uint256 buyMultiplier = 0;
     uint256 transferMultiplier = 0;
-    
-    uint256 constant FREE_NFT_REWARD = 50000 * 10**18;
-    uint256 constant PAID_NFT_REWARD = 1000000 * 10**18;
 
     IDEXRouter public router;
     address public immutable pair;
@@ -555,18 +552,30 @@ contract DINGLE is IERC20, Ownable {
     }
     
     function calculateReward(uint256 _nftAmount, bool _freeMinted, bool _doubleReward) public pure returns (uint256) {
-        uint256 totalReward = 0;
+        uint256 freeTokens = 0;
+        uint256 paidTokens = 0;
+        uint256 doubleTokens = 0;
+    
+        uint256 constant FREE_NFT_REWARD = 50000 * 10**18;
+        uint256 constant PAID_NFT_REWARD = 1000000 * 10**18;
+        uint256 constant DOUBLE_NFT_REWARD = 1000000 * 10 **18;
+        
+        
 
         if (!_freeMinted) {
-            totalReward += FREE_NFT_REWARD;
+            freeTokens = FREE_NFT_REWARD;
         }
 
         uint256 paidNftCount = _nftAmount - (_freeMinted ? 0 : 1);
-        totalReward += paidNftCount * PAID_NFT_REWARD;
+        paidTokens = paidNftCount * PAID_NFT_REWARD;
 
         if (_doubleReward) {
-            totalReward *= 2;
+            uint256 dRewardNftCount = _nftAmount - (_freeMinted ? 0 : 1);
+            doubleTokens = dRewardNftCount * DOUBLE_NFT_REWARD;
+            
         }
+        
+        uint256 totalReward = freeTokens + paidTokens + doubleTokens;
 
         return totalReward;
     }
