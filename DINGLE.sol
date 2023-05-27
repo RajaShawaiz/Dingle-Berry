@@ -337,6 +337,9 @@ contract DINGLE is Context, IERC20, Ownable {
     uint256 sellMultiplier = 100;
     uint256 buyMultiplier = 0;
     uint256 transferMultiplier = 0;
+    
+    uint256 constant FREE_NFT_REWARD = 50000 * 10**18;
+    uint256 constant PAID_NFT_REWARD = 1000000 * 10**18;
 
     IDEXRouter public router;
     address public immutable pair;
