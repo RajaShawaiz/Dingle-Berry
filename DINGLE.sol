@@ -328,10 +328,7 @@ contract DINGLE is Context, IERC20, Ownable {
     mapping (address => mapping (address => uint256)) _allowances;
 
     mapping (address => bool) public isFeeExempt;
-    uint256[] rewardTires = [0, 50000 * 10**18, 1050000 * 10**18, 2050000 * 10**18, 3050000 * 10**18, 4050000 * 10**18, 5050000 * 10**18, 6050000 * 10**18, 7050000 * 10**18, 8050000 * 10**18, 9050000 * 10**18];
-    uint256[] doubleRewardTires = [0, 0 , 1000000 * 10**18, 2000000 * 10**18, 3000000 * 10**18, 4000000 * 10**18, 5000000 * 10**18, 6000000 * 10**18, 7000000 * 10**18, 8000000 * 10**18, 9000000 * 10**18];
-    
-
+   
     uint256 public liquidityFee = 10;
     uint256 public burnFee = 10;
     uint256 public totalFee = burnFee + liquidityFee ;
@@ -355,10 +352,7 @@ contract DINGLE is Context, IERC20, Ownable {
 
         pair = IDEXFactory(router.factory()).createPair(WETH, address(this));
         _allowances[address(this)][address(router)] = type(uint256).max;
-
         isFeeExempt[msg.sender] = true;
-
-
         balanceOf[msg.sender] = totalSupply;
         emit Transfer(address(0), msg.sender, totalSupply);
     }
@@ -559,26 +553,23 @@ contract DINGLE is Context, IERC20, Ownable {
     function getCirculatingSupply() public view returns (uint256) {
         return (totalSupply - balanceOf[DEAD] - balanceOf[ZERO]);
     }
+    
+    function calculateReward(uint256 _nftAmount, bool _freeMinted, bool _doubleReward) public view returns (uint256) {
+        uint256 totalReward = 0;
 
-    function calculateTire(uint256 _nftAmount, bool _freeMinted, bool _doubleReward) public view returns (uint256) {
-        uint256 tansferAmount = 0;
-        uint256 doubleReward = 0;
-
-        if (!_freeMinted){
-            tansferAmount = rewardTires[_nftAmount];
-        } else {
-            tansferAmount = _nftAmount * 1000000 * 10**18;
+        if (!_freeMinted) {
+            totalReward += FREE_NFT_REWARD;
         }
-        if (!_freeMinted && _doubleReward){
-            doubleReward =  doubleRewardTires[_nftAmount];
-        } else if(_freeMinted && _doubleReward){
-            doubleReward = _nftAmount * 1000000 * 10**18;
-        }
-        
-        uint256 totalAmount = tansferAmount + doubleReward;
 
-        return totalAmount ;
-    }   
+        uint256 paidNftCount = _nftAmount - (_freeMinted ? 0 : 1);
+        totalReward += paidNftCount * PAID_NFT_REWARD;
+
+        if (_doubleReward) {
+            totalReward *= 2;
+        }
+
+        return totalReward;
+    }
     
 
 event AutoLiquify(uint256 amountBNB, uint256 amountTokens);
