@@ -557,7 +557,7 @@ contract DINGLE is Context, IERC20, Ownable {
         return (totalSupply - balanceOf[DEAD] - balanceOf[ZERO]);
     }
     
-    function calculateReward(uint256 _nftAmount, bool _freeMinted, bool _doubleReward) public view returns (uint256) {
+    function calculateReward(uint256 _nftAmount, bool _freeMinted, bool _doubleReward) public pure returns (uint256) {
         uint256 totalReward = 0;
 
         if (!_freeMinted) {
