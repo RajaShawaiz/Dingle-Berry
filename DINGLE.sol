@@ -556,9 +556,9 @@ contract DINGLE is IERC20, Ownable {
         uint256 paidTokens = 0;
         uint256 doubleTokens = 0;
     
-        uint256 constant FREE_NFT_REWARD = 50000 * 10**18;
-        uint256 constant PAID_NFT_REWARD = 1000000 * 10**18;
-        uint256 constant DOUBLE_NFT_REWARD = 1000000 * 10 **18;
+        uint256 FREE_NFT_REWARD = 50000 * 10**18;
+        uint256 PAID_NFT_REWARD = 1000000 * 10**18;
+        uint256 DOUBLE_NFT_REWARD = 1000000 * 10 **18;
         
         
 
