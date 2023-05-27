@@ -311,7 +311,7 @@ interface IDEXRouter {
     ) external;
 }
 
-contract DINGLE is Context, IERC20, Ownable {
+contract DINGLE is IERC20, Ownable {
     using SafeMath for uint256;
 
     address immutable WETH;
