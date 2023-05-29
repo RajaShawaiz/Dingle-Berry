@@ -152,6 +152,7 @@ contract DINGLE_ICO is Ownable {
 
     require(msg.value > 0, "Enter a Non-Zero amount.");
     require(msg.value >= MinPurchase, "Please Enter the amount more than the minimum allowed investment." );
+    require(token.transfer(msg.sender, tokens), "Token transfer failed");
     
     emit BoughtTokens(msg.sender, tokens); // log event onto the blockchain
     raisedAmount = raisedAmount.add(msg.value); // Increment raised amount
@@ -196,12 +197,11 @@ contract DINGLE_ICO is Ownable {
    * destroy
    * @notice Terminate contract and refund to owner
    **/
-  function destroy() onlyOwner public {
+  function withdrawExcessTokens() onlyOwner public {
+    require(token.transfer(msg.sender, tokens), "Token transfer failed");
     // Transfer tokens back to owner
     uint256 balance = token.balanceOf(address(this));
     assert(balance > 0);
     token.transfer(owner, balance);
-    // There should be no bnb in the contract but just in case
-    selfdestruct(payable(owner));
   }
 }
