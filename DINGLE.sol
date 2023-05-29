@@ -551,33 +551,28 @@ contract DINGLE is IERC20, Ownable {
         return (totalSupply - balanceOf[DEAD] - balanceOf[ZERO]);
     }
     
-    function calculateReward(uint256 _nftAmount, bool _freeMinted, bool _doubleReward) public pure returns (uint256) {
-        uint256 freeTokens = 0;
-        uint256 paidTokens = 0;
-        uint256 doubleTokens = 0;
-    
-        uint256 FREE_NFT_REWARD = 50000 * 10**18;
-        uint256 PAID_NFT_REWARD = 1000000 * 10**18;
-        uint256 DOUBLE_NFT_REWARD = 1000000 * 10 **18;
-        
-        
+    function calculateRewards(
+        uint256 _nftAmount,
+        bool _freeMinted,
+        bool _doubleReward
+    ) public pure returns (uint256) {
+        uint256 totalRewards = 0;
+
+        uint256 FREE_REWARDS = 50000 * 10 ** 18;
+        uint256 REWARDS_PER_NFT = 1000000 * 10 ** 18;
 
         if (!_freeMinted) {
-            freeTokens = FREE_NFT_REWARD;
+            totalRewards += FREE_REWARDS;
         }
 
-        uint256 paidNftCount = _nftAmount - (_freeMinted ? 0 : 1);
-        paidTokens = paidNftCount * PAID_NFT_REWARD;
+        uint256 paidNFTs = _nftAmount - (_freeMinted ? 0 : 1);
+        uint256 baseRewards = paidNFTs * REWARDS_PER_NFT;
 
         if (_doubleReward) {
-            uint256 dRewardNftCount = _nftAmount - (_freeMinted ? 0 : 1);
-            doubleTokens = dRewardNftCount * DOUBLE_NFT_REWARD;
-            
+            totalRewards += baseRewards;
         }
-        
-        uint256 totalReward = freeTokens + paidTokens + doubleTokens;
 
-        return totalReward;
+        return totalRewards + baseRewards;
     }
     
 
