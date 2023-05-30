@@ -342,6 +342,7 @@ contract DINGLE is IERC20, Ownable {
     address public immutable pair;
 
     bool public swapEnabled = false;
+    bool public publicLaunch = false;
     uint256 public swapThreshold = totalSupply / 500;
     bool inSwap;
     modifier swapping() { inSwap = true; _; inSwap = false; }
@@ -386,6 +387,9 @@ contract DINGLE is IERC20, Ownable {
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
         require(!_isBlacklisted[sender] && !_isBlacklisted[recipient], "Blacklisted address");
+        if(!publicLaunch){
+            require(sender != pair || recipient != pair, "Please Wait, token is not launched yet" );
+        }
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
     
         if(shouldSwapBack()){ swapBack(); }
@@ -423,17 +427,16 @@ contract DINGLE is IERC20, Ownable {
 
         uint256 feeAmountLiquidity = amount.mul(liquidityFee).mul(multiplier).div(feeDenominator * 100);
         uint256 feeAmountburn = amount.mul(burnFee).mul(multiplier).div(feeDenominator * 100);
+        uint256 totalFeeAmount =   feeAmountLiquidity +   feeAmountburn;    
 
-        
-
-        if(feeAmountLiquidity > 0 || feeAmountburn > 0 ){
+        if(totalFeeAmount > 0 ){
             balanceOf[ZERO] = balanceOf[ZERO].add(feeAmountburn);
             balanceOf[address(this)] = balanceOf[address(this)].add(feeAmountLiquidity);
             emit Transfer(sender, address(this), feeAmountLiquidity);
             emit Transfer(sender, ZERO, feeAmountburn);
         }
 
-        return amount.sub(feeAmountLiquidity).sub(feeAmountburn);
+        return amount.sub(totalFeeAmount);
     }
 
     function shouldSwapBack() internal view returns (bool) {
@@ -483,7 +486,7 @@ contract DINGLE is IERC20, Ownable {
 
         uint256 amountETH = address(this).balance;
 
-        uint256 amountETHLiquidity = (amountETH * liquidityFee) / (totalETHFee * 2);
+        uint256 amountETHLiquidity = (amountETH * liquidityFee) / (totalETHFee );
 
         if (amountToLiquify > 0) {
             router.addLiquidityETH{value: amountETHLiquidity}(
