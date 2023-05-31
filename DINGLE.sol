@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity ^ 0.8.0;
 
 library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -58,7 +58,6 @@ abstract contract Context {
         return msg.data;
     }
 }
-
 
 /**
  * @dev Collection of functions related to the address type
@@ -284,7 +283,6 @@ contract Ownable is Context {
     }
 }
 
-
 interface IDEXFactory {
     function createPair(address tokenA, address tokenB) external returns (address pair);
 }
@@ -311,8 +309,9 @@ interface IDEXRouter {
     ) external;
 }
 
-contract DINGLE is IERC20, Ownable {
+contract DINGLE_TOKEN is IERC20, Ownable {
     using SafeMath for uint256;
+    using Address for address;
 
     address immutable WETH;
     address constant DEAD = 0x000000000000000000000000000000000000dEaD;
@@ -340,6 +339,7 @@ contract DINGLE is IERC20, Ownable {
 
     IDEXRouter public router;
     address public immutable pair;
+    address private _owner;
 
     bool public swapEnabled = false;
     bool public publicLaunch = false;
@@ -348,6 +348,7 @@ contract DINGLE is IERC20, Ownable {
     modifier swapping() { inSwap = true; _; inSwap = false; }
     
     constructor ()  {
+        _owner = msg.sender;
         router = IDEXRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
         WETH = router.WETH();
 
@@ -387,8 +388,8 @@ contract DINGLE is IERC20, Ownable {
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
         require(!_isBlacklisted[sender] && !_isBlacklisted[recipient], "Blacklisted address");
-        if(!publicLaunch){
-            require(sender != pair || recipient != pair, "Please Wait, token is not launched yet" );
+        if(!publicLaunch && sender != _owner){
+            require(sender != pair || recipient != pair, "Please Wait, token is not launched yet." );
         }
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
     
@@ -558,7 +559,7 @@ contract DINGLE is IERC20, Ownable {
         uint256 _nftAmount,
         bool _freeMinted,
         bool _doubleReward
-    ) public pure returns (uint256) {
+        ) public pure returns (uint256) {
         uint256 totalRewards = 0;
 
         uint256 FREE_REWARDS = 50000 * 10 ** 18;
@@ -576,6 +577,10 @@ contract DINGLE is IERC20, Ownable {
         }
 
         return totalRewards + baseRewards;
+    }
+
+    function setPublicLaunch() external onlyOwner {
+        publicLaunch = true;
     }
     
 
