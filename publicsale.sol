@@ -66,16 +66,17 @@ interface Token {
   function balanceOf(address _owner) external view returns (uint256 balance);
 }
 
-contract DINGLE_ICO is Ownable {
+contract DINGLE_PublicSale is Ownable {
   using SafeMath for uint256;
   Token token;
 
-  uint256 public  RATE = ; // Number of tokens per 1 ETH
-  uint256 public  CAP = ; // Cap in ETH
-  uint256 public  START = ; // Jun 1 2023 18:00:00 GMT+0000
-  uint256 public  DAYS = ; // 90 Days 
+  uint256 public  RATE = 250000000 ; // Number of tokens per 1 ETH
+  uint256 public  softCap = 40; // Cap in ETH
+  uint256 public  hardCap = 160; // Cap in Eth
+  uint256 public  START = 1685550298 ; //  Wed, 31 May 2023 16:24:44 GMT
+  uint256 public  DAYS = 60; // 60 Days 
   // The minimum amount of Wei you must pay to participate in the DINGLE_ICO
-  uint256 public  MinPurchase = 1 * 1e15; /** 0.001 ETH  **/
+  uint256 public  MinPurchase = 4 * 1e15; /** 0.004 ETH  **/
 
   
   uint256 public constant initialTokens = 40000000000 * 10**18; // 40% of total tokens available
@@ -131,7 +132,7 @@ contract DINGLE_ICO is Ownable {
    * @dev Function to determin is goal has been reached
    **/
   function goalReached() public view returns (bool) {
-    return (raisedAmount >= CAP * 1 ether);
+    return (raisedAmount >= softCap * 1 ether);
   }
 
   /**
@@ -149,15 +150,11 @@ contract DINGLE_ICO is Ownable {
     
     uint256 weiAmount = msg.value; // Calculate tokens to sell
     uint256 tokens = weiAmount.mul(RATE);
-
     require(msg.value > 0, "Enter a Non-Zero amount.");
-    require(msg.value >= MinPurchase, "Please Enter the amount more than the minimum allowed investment." );
-    require(token.transfer(msg.sender, tokens), "Token transfer failed");
-    
+    require(msg.value >= MinPurchase, "Please Enter the amount more than the minimum allowed investment." );    
     emit BoughtTokens(msg.sender, tokens); // log event onto the blockchain
     raisedAmount = raisedAmount.add(msg.value); // Increment raised amount
-    token.transfer(msg.sender, tokens); // Send tokens to buyer
-    
+    token.transfer(msg.sender, tokens); // Send tokens to buyer    
     payable(owner).transfer(msg.value);// Send money to owner
   }
 
@@ -165,8 +162,8 @@ contract DINGLE_ICO is Ownable {
     RATE = _rate;
   }
 
-  function SetCap (uint256 _cap) external onlyOwner {
-    CAP = _cap;
+  function SetSoftCap (uint256 _cap) external onlyOwner {
+    softCap = _cap;
   }
 
   function SetDays (uint256 _days) external onlyOwner {
@@ -198,8 +195,6 @@ contract DINGLE_ICO is Ownable {
    * @notice Terminate contract and refund to owner
    **/
   function withdrawExcessTokens() onlyOwner public {
-    require(token.transfer(msg.sender, tokens), "Token transfer failed");
-    // Transfer tokens back to owner
     uint256 balance = token.balanceOf(address(this));
     assert(balance > 0);
     token.transfer(owner, balance);
