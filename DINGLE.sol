@@ -339,7 +339,6 @@ contract DINGLE_TOKEN is IERC20, Ownable {
 
     IDEXRouter public router;
     address public immutable pair;
-    address private _owner;
 
     bool public swapEnabled = false;
     bool public publicLaunch = false;
@@ -348,7 +347,6 @@ contract DINGLE_TOKEN is IERC20, Ownable {
     modifier swapping() { inSwap = true; _; inSwap = false; }
     
     constructor ()  {
-        _owner = msg.sender;
         router = IDEXRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
         WETH = router.WETH();
 
@@ -388,7 +386,7 @@ contract DINGLE_TOKEN is IERC20, Ownable {
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
         require(!_isBlacklisted[sender] && !_isBlacklisted[recipient], "Blacklisted address");
-        if(!publicLaunch && sender != _owner){
+        if(!publicLaunch && sender != _msgSender()){
             require(sender != pair || recipient != pair, "Please Wait, token is not launched yet." );
         }
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
