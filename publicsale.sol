@@ -71,15 +71,15 @@ contract DINGLE_PublicSale is Ownable {
   Token token;
 
   uint256 public  RATE = 250000000 ; // Number of tokens per 1 ETH
-  uint256 public  softCap = 40; // Cap in ETH
-  uint256 public  hardCap = 160; // Cap in Eth
+  uint256 public  softCap = 12; // Cap in ETH
+  uint256 public  hardCap = 120; // Cap in Eth
   uint256 public  START = 1685550298 ; //  Wed, 31 May 2023 16:24:44 GMT
   uint256 public  DAYS = 60; // 60 Days 
   // The minimum amount of Wei you must pay to participate in the DINGLE_ICO
   uint256 public  MinPurchase = 4 * 1e15; /** 0.004 ETH  **/
 
   
-  uint256 public constant initialTokens = 40000000000 * 10**18; // 40% of total tokens available
+  uint256 public constant initialTokens = 30000000000 * 10**18; // 30% of total tokens available
   bool public initialized = false;
   uint256 public raisedAmount = 0;
   
