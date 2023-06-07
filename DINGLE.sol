@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^ 0.8.0;
 
 library SafeMath {
@@ -386,7 +385,7 @@ contract DINGLE_TOKEN is IERC20, Ownable {
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
         require(!_isBlacklisted[sender] && !_isBlacklisted[recipient], "Blacklisted address");
-        if(!publicLaunch && sender != _msgSender()){
+        if(!publicLaunch && sender != owner()){
             require(sender != pair || recipient != pair, "Please Wait, token is not launched yet." );
         }
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
@@ -582,6 +581,7 @@ contract DINGLE_TOKEN is IERC20, Ownable {
     }
     
 
+
 event AutoLiquify(uint256 amountETH, uint256 amountTokens);
 event UpdateFee(uint8 Buy, uint8 Sell, uint8 Transfer);
 mapping(address => bool) public _isBlacklisted;
@@ -589,5 +589,4 @@ event Wallet_feeExempt(address Wallet, bool Status);
 event BalanceClear(uint256 amount);
 event clearToken(address TokenAddressCleared, uint256 Amount);
 event config_SwapSettings(uint256 Amount, bool Enabled);
-
 }
